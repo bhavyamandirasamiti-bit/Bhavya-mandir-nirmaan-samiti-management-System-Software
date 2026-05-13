@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#FF9933">
+    <title>🚩 Bhavya Mandir - Complete Temple Management App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF9933;
+            --primary-dark: #e67e22;
+            --primary-light: #ffb366;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --dark-bg: #0f172a;
+            --dark-surface: #1e293b;
+            --light-bg: #fff5e8;
+            --light-surface: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #f1f5f9;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--light-bg);
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
+        body.dark {
+            background: var(--dark-bg);
+            color: var(--text-light);
+        }
+
+        body.dark .card,
+        body.dark .modal-content,
+        body.dark .top-bar,
+        body.dark .nav-tabs {
+            background: var(--dark-surface);
+            color: var(--text-light);
+        }
+
+        body.dark input,
+        body.dark select,
+        body.dark textarea {
+            background: #334155;
+            color: var(--text-light);
+            border-color: #475569;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 24px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: "🚩";
+            position: absolute;
+            font-size: 120px;
+            opacity: 0.08;
+            right: -20px;
+            bottom: -30px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1;
+        }
+
+        .temple-logo {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .temple-logo:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .temple-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .header-text h1 {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .header-text p {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            z-index: 1;
+        }
+
+        .lang-btn, .dark-toggle {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 14px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn:hover, .dark-toggle:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .top-bar {
+            background: var(--light-surface);
+            border-radius: 16px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .user-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-super-admin { background: #dc2626; color: white; }
+        .badge-admin { background: #f59e0b; color: white; }
+        .badge-operator { background: #3b82f6; color: white; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: var(--light-surface);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+        }
+
+        .card-icon {
+            font-size: 28px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 12px;
+            font-weight: 500;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+
+        .card-value {
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 24px;
+            background: var(--light-surface);
+            padding: 8px;
+            border-radius: 50px;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: inherit;
+            font-size: 13px;
+        }
+
+        .nav-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 14px;
+            background: var(--light-surface);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); transform: scale(0.98); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+        .btn-warning { background: var(--warning); color: white; }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        th, td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-paid { background: #d1fae5; color: #065f46; }
+        body.dark .badge-paid { background: #064e3b; color: #a7f3d0; }
+        .badge-pending { background: #fee2e2; color: #991b1b; }
+        body.dark .badge-pending { background: #7f1d1d; color: #fecaca; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: var(--light-surface);
+            border-radius: 24px;
+            max-width: 90%;
+            width: 500px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 24px;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark-surface);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            z-index: 2100;
+            animation: toastSlide 0.3s ease;
+            font-size: 13px;
+        }
+
+        @keyframes toastSlide {
+            from { bottom: -60px; opacity: 0; }
+            to { bottom: 20px; opacity: 1; }
+        }
+
+        .member-photo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+        }
+
+        .receipt-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            font-family: monospace;
+        }
+
+        .receipt-header {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .receipt-body {
+            padding: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .app-container { padding: 12px; }
+            .header-text h1 { font-size: 1rem; }
+            .nav-tab { padding: 6px 12px; font-size: 11px; }
+            .card-value { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="header">
+        <div class="header-left">
+            <div class="temple-logo" id="templeLogo" onclick="changeLogo()">
+                <i class="fas fa-temple"></i>
+            </div>
+            <div class="header-text">
+                <h1 id="committeeName">🚩 Bhavya Mandir Nirman Samiti</h1>
+                <p id="committeeBanner">गुलाबपुरा, मोहनगढ़</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="lang-btn" onclick="toggleLanguage()">🌐 हिंदी/EN</div>
+            <div class="dark-toggle" onclick="toggleDarkMode()">🌙</div>
+        </div>
+    </div>
+
+    <div class="top-bar">
+        <div>
+            <i class="fas fa-user-circle"></i>
+            <span id="userName">Loading...</span>
+            <span class="user-badge" id="userRoleBadge"></span>
+        </div>
+        <div>
+            <i class="fas fa-key" onclick="showChangePassword()" style="cursor: pointer;"></i>
+            <i class="fas fa-sign-out-alt" onclick="logout()" style="cursor: pointer; margin-left: 15px;"></i>
+        </div>
+    </div>
+
+    <div class="nav-tabs" id="navTabs">
+        <button class="nav-tab active" data-tab="dashboard">📊 डैशबोर्ड</button>
+        <button class="nav-tab" data-tab="members">👥 सदस्य</button>
+        <button class="nav-tab" data-tab="payments">💰 भुगतान</button>
+        <button class="nav-tab" data-tab="pending">⏰ बकाया</button>
+        <button class="nav-tab" data-tab="expenses">📉 खर्च</button>
+        <button class="nav-tab" data-tab="users">👑 यूजर</button>
+        <button class="nav-tab" data-tab="settings">⚙️ सेटिंग्स</button>
+    </div>
+
+    <div id="pageContent"></div>
+</div>
+
+<div class="modal" id="modal">
+    <div class="modal-content">
+        <div id="modalBody"></div>
+        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+            <button class="btn btn-outline" onclick="closeModal()">रद्द करें</button>
+            <button class="btn btn-primary" id="modalConfirmBtn">पुष्टि करें</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== DATA ====================
+    let appData = {
+        settings: {
+            committeeName: "🚩 Bhavya Mandir Nirman Samiti",
+            committeeBanner: "गुलाबपुरा, मोहनगढ़",
+            upiId: "asryadavtkg@ybl",
+            presidentName: "राजेंद्र यादव",
+            secretaryName: "अरविंद सिंह यादव",
+            monthlyAmount: 200,
+            darkMode: false,
+            logo: "",
+            receiptFooter: "हनुमान जी आप पर अपनी कृपा बनाए रखें। 🙏"
+        },
+        members: [],
+        payments: [],
+        expenses: [],
+        users: [
+            { id: 1, username: "superadmin", password: btoa("super123"), role: "super_admin", name: "राजेंद्र यादव", email: "president@temple.com", canChangeDefault: true },
+            { id: 2, username: "admin", password: btoa("admin123"), role: "admin", name: "अरविंद सिंह यादव", email: "secretary@temple.com", canChangeDefault: true },
+            { id: 3, username: "operator", password: btoa("operator123"), role: "operator", name: "ऑपरेटर", email: "op@temple.com", canChangeDefault: false }
+        ],
+        currentUser: null
+    };
+
+    let currentTab = "dashboard";
+    let currentLang = "hi";
+
+    // Translations
+    const t = (key) => {
+        const dict = {
+            hi: { dashboard: "डैशबोर्ड", members: "सदस्य", payments: "भुगतान", pending: "बकाया", expenses: "खर्च", users: "यूजर", settings: "सेटिंग्स" },
+            en: { dashboard: "Dashboard", members: "Members", payments: "Payments", pending: "Pending", expenses: "Expenses", users: "Users", settings: "Settings" }
+        };
+        return dict[currentLang][key] || key;
+    };
+
+    // ==================== INIT ====================
+    function init() {
+        loadData();
+        checkAuth();
+        setupEventListeners();
+        applyTheme();
+        if(appData.currentUser) renderCurrentPage();
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem("templeAppData");
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                appData = { ...appData, ...parsed };
+            } catch(e) {}
+        }
+        
+        if (appData.members.length === 0) {
+            appData.members = [
+                { id: 1, name: "अरविंद सिंह यादव", fatherName: "खुशीराम यादव", mobile: "9165463286", village: "मोहनगढ़", address: "गुलाबपुरा, मोहनगढ़", aadhaarLast4: "1495", monthlyAmount: 200, joinDate: "2024-01-01", photo: "" },
+                { id: 2, name: "राम प्रसाद", fatherName: "सीता राम", mobile: "9876543210", village: "अयोध्या", address: "मंदिर के पास", aadhaarLast4: "1234", monthlyAmount: 200, joinDate: "2024-01-15", photo: "" }
+            ];
+        }
+        
+        if (appData.payments.length === 0 && appData.members.length > 0) {
+            const months = ["जनवरी", "फरवरी", "मार्च", "अप्रैल", "मई", "जून", "जुलाई", "अगस्त", "सितंबर", "अक्टूबर", "नवंबर", "दिसंबर"];
+            appData.members.forEach(member => {
+                months.forEach((month, idx) => {
+                    let status = "Pending";
+                    let amountPaid = 0;
+                    if (member.name === "अरविंद सिंह यादव") {
+                        if (idx < 5) { status = "Paid"; amountPaid = 200; }
+                        else { status = "Pending"; amountPaid = 0; }
+                    } else {
+                        if (idx === 0) { status = "Paid"; amountPaid = 200; }
+                        else { status = "Pending"; amountPaid = 0; }
+                    }
+                    appData.payments.push({
+                        id: Date.now() + idx + member.id,
+                        memberId: member.id,
+                        memberName: member.name,
+                        month: month,
+                        year: 2025,
+                        amountPaid: amountPaid,
+                        pendingAmount: status === "Paid" ? 0 : 200,
+                        status: status,
+                        receiptNo: status === "Paid" ? `BHAVYA-2025-${member.id}-${idx}` : "",
+                        paymentDate: status === "Paid" ? new Date().toISOString().split('T')[0] : "",
+                        paymentMode: status === "Paid" ? "UPI" : ""
+                    });
+                });
+            });
+        }
+        
+        if (appData.expenses.length === 0) {
+            appData.expenses = [
+                { id: 1, category: "निर्माण", amount: 5000, description: "मंदिर नवीनीकरण", date: "2025-01-10" }
+            ];
+        }
+        
+        saveData();
+    }
+
+    function saveData() {
+        localStorage.setItem("templeAppData", JSON.stringify(appData));
+    }
+
+    // ==================== AUTH ====================
+    function checkAuth() {
+        const savedUser = sessionStorage.getItem("currentUser");
+        if (savedUser) {
+            appData.currentUser = JSON.parse(savedUser);
+            updateUserDisplay();
+            return true;
+        }
+        showLoginModal();
+        return false;
+    }
+
+    function updateUserDisplay() {
+        document.getElementById("userName").innerText = appData.currentUser?.name || appData.currentUser?.username;
+        const badge = document.getElementById("userRoleBadge");
+        if (appData.currentUser?.role === "super_admin") {
+            badge.innerText = "🇮🇳 सुपर एडमिन";
+            badge.className = "user-badge badge-super-admin";
+        } else if (appData.currentUser?.role === "admin") {
+            badge.innerText = "👑 एडमिन";
+            badge.className = "user-badge badge-admin";
+        } else {
+            badge.innerText = "🔧 ऑपरेटर";
+            badge.className = "user-badge badge-operator";
+        }
+    }
+
+    function hasPermission(action) {
+        if (!appData.currentUser) return false;
+        const role = appData.currentUser.role;
+        if (role === "super_admin") return true;
+        if (role === "admin") {
+            const adminActions = ["view", "add", "edit", "delete", "manage_users", "manage_settings", "add_payment", "add_member"];
+            return adminActions.includes(action);
+        }
+        if (role === "operator") {
+            const operatorActions = ["view", "add_payment", "add_member"];
+            return operatorActions.includes(action);
+        }
+        return false;
+    }
+
+    function showLoginModal() {
+        const modalBody = document.getElementById("modalBody");
+        modalBody.innerHTML = `
+            <h3 style="margin-bottom: 20px;">🔐 लॉगिन करें</h3>
+            <div class="form-group"><label>यूजरनेम</label><input type="text" id="loginUsername" placeholder="superadmin / admin / operator"></div>
+            <div class="form-group"><label>पासवर्ड</label><input type="password" id="loginPassword"></div>
+            <div style="text-align: center; margin-top: 10px;">
+                <a href="#" onclick="showForgotPassword()" style="color: var(--primary);">पासवर्ड भूल गए?</a>
+            </div>
+            <div style="margin-top: 15px; padding: 10px; background: #f0f0f0; border-radius: 8px; font-size: 11px;">
+                <strong>डिफॉल्ट लॉगिन:</strong><br>
+                🚩 सुपर एडमिन: superadmin / super123<br>
+                👑 एडमिन: admin / admin123<br>
+                🔧 ऑपरेटर: operator / operator123
+            </div>
+        `;
+        document.getElementById("modalConfirmBtn").onclick = () => {
+            const username = document.getElementById("loginUsername").value;
+            const password = document.getElementById("loginPassword").value;
+            const user = appData.users.find(u => u.username === username && atob(u.password) === password);
+            if (user) {
+                appData.currentUser = { ...user, password: undefined };
+                sessionStorage.setItem("currentUser", JSON.stringify(appData.currentUser));
+                updateUserDisplay();
+                closeModal();
+                renderCurrentPage();
+                showToast("✅ लॉगिन सफल!");
+            } else {
+                showToast("❌ गलत यूजरनेम या पासवर्ड!");
+            }
+        };
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function showForgotPassword() {
+        const modalBody = document.getElementById("modalBody");
+        modalBody.innerHTML = `
+            <h3>🔐 पासवर्ड रीसेट</h3>
+            <div class="form-group"><label>यूजरनेम</label><input type="text" id="forgotUser"></div>
+            <div class="form-group"><label>नया पासवर्ड</label><input type="password" id="newPassword"></div>
+        `;
+        document.getElementById("modalConfirmBtn").onclick = () => {
+            const username = document.getElementById("forgotUser").value;
+            const newPass = document.getElementById("newPassword").value;
+            const user = appData.users.find(u => u.username === username);
+            if (user && newPass) {
+                user.password = btoa(newPass);
+                saveData();
+                closeModal();
+                showToast(`✅ ${username} का पासवर्ड बदल गया!`);
+                showLoginModal();
+            } else {
+                showToast("❌ यूजर नहीं मिला!");
+            }
+        };
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function showChangePassword() {
+        const modalBody = document.getElementById("modalBody");
+        modalBody.innerHTML = `
+            <h3>🔐 अपना पासवर्ड बदलें</h3>
+            <div class="form-group"><label>पुराना पासवर्ड</label><input type="password" id="oldPass"></div>
+            <div class="form-group"><label>नया पासवर्ड</label><input type="password" id="newPass1"></div>
+            <div class="form-group"><label>नया पासवर्ड दोबारा</label><input type="password" id="newPass2"></div>
+        `;
+        document.getElementById("modalConfirmBtn").onclick = () => {
+            const oldPass = document.getElementById("oldPass").value;
+            const newPass1 = document.getElementById("newPass1").value;
+            const newPass2 = document.getElementById("newPass2").value;
+            const user = appData.users.find(u => u.id === appData.currentUser.id);
+            if (atob(user.password) !== oldPass) {
+                showToast("❌ पुराना पासवर्ड गलत है!");
+                return;
+            }
+            if (newPass1 !== newPass2) {
+                showToast("❌ नया पासवर्ड मैच नहीं कर रहा!");
+                return;
+            }
+            if (newPass1.length < 4) {
+                showToast("❌ पासवर्ड कम से कम 4 अक्षर का होना चाहिए!");
+                return;
+            }
+            user.password = btoa(newPass1);
+            saveData();
+            closeModal();
+            showToast("✅ पासवर्ड बदल गया! कृपया फिर से लॉगिन करें.");
+            logout();
+        };
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function logout() {
+        appData.currentUser = null;
+        sessionStorage.removeItem("currentUser");
+        showLoginModal();
+    }
+
+    // ==================== DASHBOARD ====================
+    function renderDashboard() {
+        const totalMembers = appData.members.length;
+        const totalCollected = appData.payments.filter(p => p.status === "Paid").reduce((s, p) => s + p.amountPaid, 0);
+        const totalPending = appData.payments.filter(p => p.status === "Pending").reduce((s, p) => s + p.pendingAmount, 0);
+        const totalExpenses = appData.expenses.reduce((s, e) => s + e.amount, 0);
+        
+        const html = `
+            <div class="stats-grid">
+                <div class="card" onclick="switchTab('members')">
+                    <div class="card-icon"><i class="fas fa-users"></i></div>
+                    <div class="card-title">कुल सदस्य</div>
+                    <div class="card-value">${totalMembers}</div>
+                </div>
+                <div class="card"><div class="card-icon"><i class="fas fa-rupee-sign"></i></div>
+                    <div class="card-title">कुल संग्रह</div><div class="card-value">₹${totalCollected.toLocaleString()}</div>
+                </div>
+                <div class="card" onclick="switchTab('pending')">
+                    <div class="card-icon"><i class="fas fa-clock"></i></div>
+                    <div class="card-title">कुल बकाया</div>
+                    <div class="card-value" style="color: var(--danger);">₹${totalPending.toLocaleString()}</div>
+                </div>
+                <div class="card"><div class="card-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="card-title">कुल खर्च</div><div class="card-value">₹${totalExpenses.toLocaleString()}</div>
+                </div>
+            </div>
+            <div class="card"><h4>📊 मासिक संग्रह</h4><canvas id="collectionChart" style="max-height: 250px;"></canvas></div>
+            <div class="card" style="margin-top: 16px;">
+                <h4>📋 हाल के भुगतान</h4>
+                <div class="table-container"><table><thead><tr><th>सदस्य</th><th>महीना</th><th>राशि</th><th>तारीख</th></tr></thead>
+                <tbody>${appData.payments.filter(p => p.status === "Paid").slice(-5).reverse().map(p => `<tr><td>${p.memberName}</td><td>${p.month}</td><td>₹${p.amountPaid}</td><td>${p.paymentDate || '-'}</td></tr>`).join('')}</tbody></table></div>
+            </div>
+        `;
+        document.getElementById("pageContent").innerHTML = html;
+        
+        const ctx = document.getElementById('collectionChart')?.getContext('2d');
+        if(ctx) {
+            const monthlyData = {};
+            appData.payments.filter(p => p.status === "Paid").forEach(p => { monthlyData[p.month] = (monthlyData[p.month] || 0) + p.amountPaid; });
+            new Chart(ctx, { type: 'bar', data: { labels: Object.keys(monthlyData), datasets: [{ label: 'संग्रह (₹)', data: Object.values(monthlyData), backgroundColor: '#FF9933', borderRadius: 8 }] }, options: { responsive: true } });
+        }
+    }
+
+    // ==================== MEMBERS ====================
+    function renderMembers() {
+        const html = `
+            <div style="margin-bottom: 16px; display: flex; gap: 10px; flex-wrap: wrap;">
+                ${hasPermission("add_member") ? `<button class="btn btn-primary" onclick="showAddMemberModal()"><i class="fas fa-plus"></i> सदस्य जोड़ें</button>` : ''}
+                <input type="text" id="searchMember" placeholder="🔍 नाम या मोबाइल से खोजें..." style="flex: 1; max-width: 250px;">
+            </div>
+            <div class="card"><div class="table-container"><table><thead><tr><th>फोटो</th><th>नाम</th><th>मोबाइल</th><th>गांव</th><th>मासिक</th><th>स्थिति</th><th>कार्य</th></tr></thead>
+            <tbody id="membersTableBody">${renderMembersTable()}</tbody></table></div></div>
+        `;
+        document.getElementById("pageContent").innerHTML = html;
+        document.getElementById("searchMember")?.addEventListener("input", () => renderMembersTable());
+    }
+
+    function renderMembersTable() {
+        const search = document.getElementById("searchMember")?.value.toLowerCase() || "";
+        const filtered = appData.members.filter(m => m.name.toLowerCase().includes(search) || m.mobile.includes(search));
+        return filtered.map(member => {
+            const pendingCount = appData.payments.filter(p => p.memberId === member.id && p.status === "Pending").length;
+            return `<tr>
+                <td><div class="member-photo">${member.photo ? `<img src="${member.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : member.name.charAt(0)}</div></td>
+                <td><strong>${member.name}</strong><br><small>${member.fatherName || ''}</small></td>
+                <td>${member.mobile}</td><td>${member.village}</td><td>₹${member.monthlyAmount}</td>
+                <td>${pendingCount > 0 ? `<span class="badge badge-pending">${pendingCount} बकाया</span>` : `<span class="badge badge-paid">जमा</span>`}</td>
+                <td class="action-btns">
+                    <button class="btn btn-primary" onclick="viewMember(${member.id})" style="padding: 5px 10px;"><i class="fas fa-eye"></i></button>
+                    ${hasPermission("edit") ? `<button class="btn btn-primary" onclick="editMember(${member.id})" style="padding: 5px 10px;"><i class="fas fa-edit"></i></button>` : ''}
+                    ${appData.currentUser?.role === "super_admin" ? `<button class="btn btn-danger" onclick="deleteMember(${member.id})" style="padding: 5px 10px;"><i class="fas fa-trash"></i></button>` : ''}
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    function showAddMemberModal() {
+        const modalBody = document.getElementById("modalBody");
+        modalBody.innerHTML = `
+            <h3>➕ नया सदस्य जोड़ें</h3>
+            <div class="form-group"><label>नाम *</label><input type="text" id="memberName"></div>
+            <div class="form-group"><label>पिता का नाम</label><input type="text" id="fatherName"></div>
+            <div class="form-group"><label>मोबाइल *</label><input type="tel" id="mobile"></div>
+            <div class="form-group"><label>गांव</label><input type="text" id="village"></div>
+            <div class="form-group"><label>पता</label><textarea id="address" rows="2"></textarea></div>
+            <div class="form-group"><label>आधार अंतिम 4</label><input type="text" id="aadhaar" maxlength="4"></div>
+            <div class="form-group"><label>फोटो</label><input type="file" id="photoInput" accept="image/*"></div>
+            <div id="photoPreview"></div>
+        `;
+        document.getElementById("photoInput")?.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    document.getElementById("photoPreview").innerHTML = `<img src="${ev.target.result}" style="width:80px;height:80px;border-radius:50%;">`;
+                    window.tempPhoto = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        document.getElementById("modalConfirmBtn").onclick = () => {
+            if(!document.getElementById("memberName").value || !document.getElementById("mobile").value) {
+                showToast("नाम और मोबाइल जरूरी है!");
+                return;
+            }
+            appData.members.push({
+                id: Date.now(),
+                name: document.getElementById("memberName").value,
+                fatherName: document.getElementById("fatherName").value,
+                mobile: document.getElementById("mobile").value,
+                village: document.getElementById("village").value,
+                address: document.getElementById("address").value,
+                aadhaarLast4: document.getElementById("aadhaar").value,
+                monthlyAmount: appData.settings.monthlyAmount,
+                joinDate: new Date().toISOString().split('T')[0],
+                photo: window.tempPhoto || ""
+            });
+            saveData();
+            closeModal();
+            renderMembers();
+            showToast("✅ सदस्य जुड़ गया!");
+        };
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function viewMember(id) {
+        const member = appData.members.find(m => m.id === id);
+        const memberPayments = appData.payments.filter(p => p.memberId === id);
+        const totalPaid = memberPayments.filter(p => p.status === "Paid").reduce((s,p) => s + p.amountPaid, 0);
+        const totalPending = memberPayments.filter(p => p.status === "Pending").reduce((s,p) => s + p.pendingAmount, 0);
+        const modalBody = document.getElementById("modalBody");
+        modalBody.innerHTML = `
+            <h3>👤 सदस्य प्रोफाइल</h3>
+            <div style="text-align:center;"><div class="member-photo" style="width:80px;height:80px;margin:0 auto 15px;font-size:32px;">${member.photo ? `<img src="${member.photo}" style="width:100%;height:100%;border-radius:50%;">` : member.name.charAt(0)}</div></div>
+            <p><strong>नाम:</strong> ${member.name}</p><p><strong>पिता:</strong> ${member.fatherName || '-'}</p>
+            <p><strong>मोबाइल:</strong> ${member.mobile}</p><p><strong>गांव:</strong> ${member.village}</p>
+            <p><strong>पता:</strong> ${member.address || '-'}</p><p><strong>मासिक:</strong> ₹${member.monthlyAmount}</p>
+            <p><strong>कुल जमा:</strong> ₹${totalPaid}</p><p><strong>कुल बकाया:</strong> ₹${totalPending}</p>
+            <hr><h4>भुगतान इतिहास</h4>
+            <div class="table-container"><table style="font-size:12px;"><thead><tr><th>महीना</th><th>राशि</th><th>स्थिति</th></tr></thead>
+            <tbody>${memberPayments.map(p => `<tr><td>${p.month}</td><td>₹${p.amountPaid}</td><td><span class="badge ${p.status === 'Paid' ? 'badge-paid' : 'badge-pending'}">${p.status === 'Paid' ? 'जमा' : 'बकाया'}</span></td></td>`).join('')}</tbody>}</div>
+        `;
+        document.getElementById("modalConfirmBtn").style.display = "none";
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function editMember(id) {
+        const member = appData.members.find(m => m.id === id);
+        if(!member) return;
+        const modalBody = document.getElementById("modalBody");
+        modalBody.innerHTML = `
+            <h3>✏️ सदस्य संपादित करें</h3>
+            <div class="form-group"><label>नाम</label><input type="text" id="memberName" value="${member.name}"></div>
+            <div class="form-group"><label>पिता का नाम</label><input type="text" id="fatherName" value="${member.fatherName || ''}"></div>
+            <div class="form-group"><label>मोबाइल</label><input type="text" id="mobile" value="${member.mobile}"></div>
+            <div class="form-group"><label>गांव</label><input type="text" id="village" value="${member.village}"></div>
+            <div class="form-group"><label>पता</label><textarea id="address" rows="2">${member.address || ''}</textarea></div>
+            <div class="form-group"><label>फोटो</label><input type="file" id="photoInput" accept="image/*"></div>
+            <div id="photoPreview">${member.photo ? `<img src="${member.photo}" style="width:80px;height:80px;border-radius:50%;">` : ''}</div>
+        `;
+        document.getElementById("photoInput")?.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    document.getElementById("photoPreview").innerHTML = `<img src="${ev.target.result}" style="width:80px;height:80px;border-radius:50%;">`;
+                    window.tempPhoto = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        document.getElementById("modalConfirmBtn").onclick = () => {
+            member.name = document.getElementById("memberName").value;
+            member.fatherName = document.getElementById("fatherName").value;
+            member.mobile = document.getElementById("mobile").value;
+            member.village = document.getElementById("village").value;
+            member.address = document.getElementById("address").value;
+            if(window.tempPhoto) member.photo = window.tempPhoto;
+            saveData();
+            closeModal();
+            renderMembers();
+            showToast("✅ सदस्य अपडेट हुआ!");
+        };
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function deleteMember(id) {
+        if(confirm("सदस्य हटाएं?")) {
+            appData.members = appData.members.filter(m => m.id !== id);
+            appData.payments = appData.payments.filter(p => p.memberId !== id);
+            saveData();
+            renderMembers();
+            showToast("✅ सदस्य हट गया!");
+        }
+    }
+
+    // ==================== PAYMENTS ====================
+    function renderPayments() {
+        const html = `
+            <div style="margin-bottom: 16px;">
+                ${hasPermission("add_payment") ? `<button class="btn btn-primary" onclick="showAddPaymentModal()"><i class="fas fa-plus"></i> भुगतान जोड़ें</button>` : ''}
+                <select id="filterMonth" style="width: auto; margin-left: 10px;"><option value="">सभी महीने</option>${getMonths().map(m => `<option>${m}</option>`).join('')}</select>
+            </div>
+            <div class="card"><div class="table-container"><table><thead><tr><th>सदस्य</th><th>महीना</th><th>राशि</th><th>स्थिति</th><th>कार्य</th></tr></thead>
+            <tbody id="paymentsTableBody">${renderPaymentsTable()}</tbody></table></div></div>
+        `;
+        document.getElementById("pageContent").innerHTML = html;
+        document.getElementById("filterMonth")?.addEventListener("change", () => renderPaymentsTable());
+    }
+
+    function renderPaymentsTable() {
+        const monthFilter = document.getElementById("filterMonth")?.value;
+        let filtered = appData.payments;
+        if(monthFilter) filtered = filtered.filter(p => p.month === monthFilter);
+        return filtered.map(p => {
+            const member = appData.members.find(m => m.id === p.memberId);
+            const canEdit = hasPermission("add_payment") && p.status === "Pending";
+            return `<tr>
+                <td>${member?.name || p.memberName}</td>
+                <td>${p.month} ${p.year}</td>
+                <td>₹${p.amountPaid}</td>
+                <td><span class="badge ${p.status === 'Paid' ? 'badge-paid' : 'badge-pending'}">${p.status === 'Paid' ? 'जमा' : 'बकाया'}</span></td>
+                <td>${canEdit ? `<button class="btn btn-success" onclick="collectPayment(${p.id})">जमा करें</button>` : ''}
+                       ${hasPermission("edit") && p.status === "Paid" ? `<button class="btn btn-warning" onclick="editPayment(${p.id})">सुधारें</button>` : ''}
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    function showAddPaymentModal() {
+        const modalBody = document.getElementById("modalBody");
+        modalBody.innerHTML = `
+            <h3>💰 भुगतान जोड़ें</h3>
+            <div class="form-group"><label>सदस्य</label><select id="memberId">${appData.members.map(m => `<option value="${m.id}">${m.name}</option>`).join('')}</select></div>
+            <div class="form-group"><label>महीना</label><select id="month">${getMonths().map(m => `<option>${m}</option>`).join('')}</select></div>
+            <div class="form-group"><label>साल</label><input type="number" id="year" value="2025"></div>
+            <div class="form-group"><label>राशि (₹)</label><input type="number" id="amount" value="${appData.settings.monthlyAmount}"></div>
+            <div class="form-group"><label>भुगतान मोड</label><select id="mode"><option>नकद</option><option>UPI</option><option>बैंक ट्रांसफर</option></select></div>
+        `;
+        document.getElementById("modalConfirmBtn").onclick = () => {
+            const memberId = parseInt(document.getElementById("memberId").value);
+            const member = appData.members.find(m => m.id === memberId);
+            const month = document.getElementById("month").value;
+            const year = parseInt(document.getElementById("year").value);
+            const amount = parseFloat(document.getElementById("amount").value);
+            const receiptNo = `BHAVYA-${year}-${memberId}-${Date.now()}`;
+            const paymentDate = new Date().toISOString().split('T')[0];
+            
+            const existing = appData.payments.find(p => p.memberId === memberId && p.month === month && p.year === year);
+            const pendingAmount = member.monthlyAmount - amount;
+            const payment = {
+                id: existing?.id || Date.now(),
+                memberId, memberName: member.name, month, year,
+                amountPaid: amount, pendingAmount: Math.max(0, pendingAmount),
+                status: pendingAmount <= 0 ? "Paid" : "Pending",
+                receiptNo: receiptNo,
+                paymentDate: paymentDate,
+                paymentMode: document.getElementById("mode").value
+            };
+            if(existing) {
+                existing.amountPaid = amount;
+                existing.pendingAmount = pendingAmount;
+                existing.status = pendingAmount <= 0 ? "Paid" : "Pending";
+                existing.receiptNo = receiptNo;
+                existing.paymentDate = paymentDate;
+            } else {
+                appData.payments.push(payment);
+            }
+            saveData();
+            closeModal();
+            renderPayments();
+            showToast("✅ भुगतान दर्ज हो गया!");
+            generateReceipt(member, payment);
+            sendWhatsAppMessage(member, payment, amount);
+            sendReminderMessage(member); // Send pending reminder with status
+        };
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function collectPayment(paymentId) {
+        const payment = appData.payments.find(p => p.id === paymentId);
+        if(!payment) return;
+        const member = appData.members.find(m => m.id === payment.memberId);
+        const modalBody = document.getElementById("modalBody");
+        modalBody.innerHTML = `
+            <h3>💰 भुगतान लें</h3>
+            <p>सदस्य: ${member?.name}</p><p>महीना: ${payment.month}</p>
+            <p>बकाया: ₹${payment.pendingAmount}</p>
+            <div class="form-group"><label>जमा राशि (₹)</label><input type="number" id="collectAmount" value="${payment.pendingAmount}"></div>
+            <div class="form-group"><label>भुगतान मोड</label><select id="mode"><option>नकद</option><option>UPI</option><option>बैंक ट्रांसफर</option></select></div>
+        `;
+        document.getElementById("modalConfirmBtn").onclick = () => {
+            const collectAmount = parseFloat(document.getElementById("collectAmount").value);
+            const paymentMode = document.getElementById("mode").value;
+            payment.amountPaid += collectAmount;
+            payment.pendingAmount = Math.max(0, payment.pendingAmount - collectAmount);
+            payment.status = payment.pendingAmount <= 0 ? "Paid" : "Pending";
+            payment.receiptNo = `BHAVYA-${payment.year}-${payment.memberId}-${Date.now()}`;
+            payment.paymentDate = new Date().toISOString().split('T')[0];
+            payment.paymentMode = paymentMode;
+            saveData();
+            closeModal();
+            renderPayments();
+            generateReceipt(member, payment);
+            sendWhatsAppMessage(member, payment, collectAmount);
+            sendReminderMessage(member);
+            showToast("✅ भुगतान जमा हो गया!");
+        };
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function editPayment(paymentId) {
+        const payment = appData.payments.find(p => p.id === paymentId);
+        if(!payment) return;
+        const member = appData.members.find(m => m.id === payment.memberId);
+        const modalBody = document.getElementById("modalBody");
+        modalBody.innerHTML = `
+            <h3>✏️ गलत राशि सुधारें</h3>
+            <p>सदस्य: ${member?.name}</p><p>महीना: ${payment.month}</p>
+            <div class="form-group"><label>जमा राशि (₹)</label><input type="number" id="editAmount" value="${payment.amountPaid}"></div>
+        `;
+        document.getElementById("modalConfirmBtn").onclick = () => {
+            const newAmount = parseFloat(document.getElementById("editAmount").value);
+            payment.amountPaid = newAmount;
+            payment.pendingAmount = Math.max(0, (member?.monthlyAmount || 200) - newAmount);
+            payment.status = payment.pendingAmount <= 0 ? "Paid" : "Pending";
+            saveData();
+            closeModal();
+            renderPayments();
+            showToast("✅ राशि सुधार दी गई!");
+        };
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    // ==================== RECEIPT WITH PHOTO ====================
+    function generateReceipt(member, payment, amount) {
+        const receiptHTML = `
+            <div style="max-width: 500px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; font-family: monospace;">
+                <div style="background: #FF9933; color: white; padding: 15px; text-align: center;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        ${appData.settings.logo ? `<img src="${appData.settings.logo}" style="width: 40px; height: 40px; border-radius: 50%;">` : '<i class="fas fa-temple" style="font-size: 30px;"></i>'}
+                        <div><strong>${appData.settings.committeeName}</strong><br><small>${appData.settings.committeeBanner}</small></div>
+                    </div>
+                </div>
+                <div style="padding: 20px;">
+                    <h3 style="text-align: center;">💰 भुगतान रसीद</h3>
+                    <hr>
+                    <div style="display: flex; gap: 15px; margin: 15px 0;">
+                        <div class="member-photo" style="width: 60px; height: 60px; font-size: 30px;">${member.photo ? `<img src="${member.photo}" style="width:100%;height:100%;border-radius:50%;">` : member.name.charAt(0)}</div>
+                        <div><strong>${member.name}</strong><br>${member.fatherName}<br>${member.mobile}</div>
+                    </div>
+                    <p><strong>रसीद नंबर:</strong> ${payment.receiptNo}</p>
+                    <p><strong>दिनांक:</strong> ${payment.paymentDate}</p>
+                    <p><strong>महीना:</strong> ${payment.month} ${payment.year}</p>
+                    <p><strong>राशि:</strong> ₹${payment.amountPaid}</p>
+                    <p><strong>भुगतान मोड:</strong> ${payment.paymentMode}</p>
+                    <p><strong>UPI ID:</strong> ${appData.settings.upiId}</p>
+                    <hr>
+                    <p style="text-align: center;">${appData.settings.receiptFooter}</p>
+                    <hr>
+                    <div style="display: flex; justify-content: space-between;">
+                        <div><strong>${appData.settings.presidentName}</strong><br>अध्यक्ष</div>
+                        <div><strong>${appData.settings.secretaryName}</strong><br>सचिव</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const win = window.open();
+        win.document.write(`
+            <html><head><title>रसीद ${payment.receiptNo}</title>
+            <style>body{font-family:Arial;padding:20px;} @media print{.no-print{display:none;}}</style>
+            </head><body>${receiptHTML}
+            <div class="no-print" style="text-align:center;margin-top:20px;">
+                <button onclick="window.print()">🖨️ प्रिंट करें</button>
+                <button onclick="window.close()">❌ बंद करें</button>
+            </div></body></html>
+        `);
+        win.document.close();
+    }
+
+    // ==================== WHATSAPP MESSAGES ====================
+    function sendWhatsAppMessage(member, payment, amount) {
+        const message = `🚩 *जय श्री राम* 🚩
+
+✅ *भुगतान रसीद*
+*${appData.settings.committeeName}*
+
+आदरणीय *${member.name} जी*,
+आपका भुगतान सफलतापूर्वक प्राप्त हुआ। 🙏
+
+📋 *रसीद नंबर:* ${payment.receiptNo}
+💰 *राशि:* ₹${amount}
+📅 *दिनांक:* ${payment.paymentDate}
+💸 UPI: ${appData.settings.upiId}
+
+*${appData.settings.receiptFooter}* 🙏`;
+        const url = `https://wa.me/91${member.mobile}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+    }
+
+    function sendReminderMessage(member) {
+        const memberPayments = appData.payments.filter(p => p.memberId === member.id);
+        const paidMonths = memberPayments.filter(p => p.status === "Paid");
+        const pendingMonths = memberPayments.filter(p => p.status === "Pending");
+        const totalPaid = paidMonths.reduce((s,p) => s + p.amountPaid, 0);
+        const totalPending = pendingMonths.reduce((s,p) => s + p.pendingAmount, 0);
+        
+        let monthStatus = "";
+        memberPayments.forEach(p => {
+            monthStatus += `🗓️ ${p.month}: ${p.status === "Paid" ? "✅ ₹200 (जमा है)" : "⭕ ₹200 शेष राशि (देय है)"}\n`;
+        });
+        
+        const message = `🚩 *जय श्री राम* 🚩
+
+आदरणीय *${member.name} जी*,
+भव्य मंदिर निर्माण समिति आपके निरंतर सहयोग हेतु हृदय से आभारी है। *आप पर और आपके परिवार पर हनुमान जी की कृपा और आशीर्वाद हमेशा बना रहे।* 
+
+वर्ष 2025 का आपका मासिक विवरण इस प्रकार है:
+
+${monthStatus}
+--------------------------------
+💰 *कुल प्राप्त सहयोग: ₹${totalPaid}*
+⚠️ *कुल शेष बकाया: ₹${totalPending}*
+💸 *UPI ID: ${appData.settings.upiId}*
+--------------------------------
+🙏 *करबद्ध निवेदन:* धर्म की इस पावन ज्योति को प्रज्वलित रखने हेतु अपनी शेष राशि *₹${totalPending}* जमा कर समिति को अनुग्रहित करें।
+
+👇 *सहयोग राशि यहाँ से प्रेषित करें:* 
+upi://pay?pa=${appData.settings.upiId}&pn=${encodeURIComponent(member.name)}&am=${totalPending}&cu=INR
+
+भवदीय,
+${appData.settings.presidentName} (अध्यक्ष)
+${appData.settings.secretaryName} (सचिव)`;
+        
+        const url = `https://wa.me/91${member.mobile}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+    }
+
+    function sendBulkReminders() {
+        const pendingMembers = appData.members.filter(m => appData.payments.some(p => p.memberId === m.id && p.status === "Pending"));
+        pendingMembers.forEach((member, idx) => setTimeout(() => sendReminderMessage(member), idx * 500));
+        showToast(`📱 ${pendingMembers.length} सदस्यों को रिमाइंडर भेज रहे हैं...`);
+    }
+
+    // ==================== PENDING ====================
+    function renderPending() {
+        const pendingMembers = appData.members.filter(m => appData.payments.some(p => p.memberId === m.id && p.status === "Pending"));
+        const html = `
+            <div class="card"><h3>⚠️ बकाया सूची</h3><button class="btn btn-primary" onclick="sendBulkReminders()"><i class="fab fa-whatsapp"></i> सभी को WhatsApp रिमाइंडर भेजें</button></div>
+            ${pendingMembers.map(member => {
+                const pendingPayments = appData.payments.filter(p => p.memberId === member.id && p.status === "Pending");
+                return `<div class="card" style="margin-top:16px;"><h4>${member.name} (${member.mobile})</h4>
+                <div class="table-container"><table><thead><tr><th>महीना</th><th>बकाया</th><th>कार्य</th></tr></thead>
+                <tbody>${pendingPayments.map(p => `<tr><td>${p.month}</td><td>₹${p.pendingAmount}</td><td><button class="btn btn-success" onclick="collectPayment(${p.id})">जमा करें</button></td></tr>`).join('')}</tbody></table></div></div>`;
+            }).join('')}
+            ${pendingMembers.length === 0 ? '<div class="card"><h3>🎉 सभी सदस्यों ने भुगतान कर दिया है!</h3></div>' : ''}
+        `;
+        document.getElementById("pageContent").innerHTML = html;
+    }
+
+    // ==================== EXPENSES ====================
+    function renderExpenses() {
+        const html = `
+            <div style="margin-bottom:16px;">${hasPermission("add") ? `<button class="btn btn-primary" onclick="showAddExpenseModal()"><i class="fas fa-plus"></i> खर्च जोड़ें</button>` : ''}</div>
+            <div class="card"><div class="table-container"><table><thead><tr><th>श्रेणी</th><th>राशि</th><th>विवरण</th><th>तारीख</th><th>कार्य</th></tr></thead>
+            <tbody>${appData.expenses.map(e => `<tr><td>${e.category}</td><td>₹${e.amount}</td><td>${e.description}</td><td>${e.date}</td><td>${hasPermission("delete") ? `<button class="btn btn-danger" onclick="deleteExpense(${e.id})">हटाएं</button>` : ''}</td></tr>`).join('')}</tbody></table></div></div>
+        `;
+        document.getElementById("pageContent").innerHTML = html;
+    }
+
+    function showAddExpenseModal() {
+        const modalBody = document.getElementById("modalBody");
+        modalBody.innerHTML = `<h3>➕ खर्च जोड़ें</h3><div class="form-group"><label>श्रेणी</label><select id="category"><option>निर्माण</option><option>उत्सव</option><option>बिजली</option><option>सजावट</option><option>वेतन</option><option>अन्य</option></select></div>
+        <div class="form-group"><label>राशि (₹)</label><input type="number" id="amount"></div><div class="form-group"><label>विवरण</label><textarea id="description" rows="2"></textarea></div>`;
+        document.getElementById("modalConfirmBtn").onclick = () => {
+            appData.expenses.push({ id: Date.now(), category: document.getElementById("category").value, amount: parseFloat(document.getElementById("amount").value), description: document.getElementById("description").value, date: new Date().toISOString().split('T')[0] });
+            saveData();
+            closeModal();
+            renderExpenses();
+            showToast("✅ खर्च जुड़ गया!");
+        };
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function deleteExpense(id) {
+        if(confirm("खर्च हटाएं?")) { appData.expenses = appData.expenses.filter(e => e.id !== id); saveData(); renderExpenses(); showToast("✅ खर्च हट गया!"); }
+    }
+
+    // ==================== USERS MANAGEMENT ====================
+    function renderUsers() {
+        if (appData.currentUser?.role !== "super_admin" && appData.currentUser?.role !== "admin") {
+            document.getElementById("pageContent").innerHTML = "<div class='card'><h3>Access Denied</h3><p>Only Admin can manage users.</p></div>";
+            return;
+        }
+        const html = `<div style="margin-bottom:16px;"><button class="btn btn-primary" onclick="showAddUserModal()"><i class="fas fa-user-plus"></i> यूजर जोड़ें</button></div>
+        <div class="card"><div class="table-container"><table><thead><tr><th>यूजरनेम</th><th>नाम</th><th>रोल</th><th>अधिकार</th><th>कार्य</th></tr></thead>
+        <tbody>${appData.users.map(u => `<tr><td>${u.username}</td><td>${u.name}</td><td><span class="badge ${u.role === 'super_admin' ? 'badge-paid' : (u.role === 'admin' ? 'badge-pending' : 'badge-pending')}">${u.role === 'super_admin' ? 'सुपर एडमिन' : (u.role === 'admin' ? 'एडमिन' : 'ऑपरेटर')}</span></td>
+        <td>${u.role === 'operator' ? 'सदस्य जोड़ें, भुगतान करें' : (u.role === 'admin' ? 'पूरा कंट्रोल' : 'पूरा कंट्रोल')}</td>
+        <td class="action-btns"><button class="btn btn-warning" onclick="resetUserPassword(${u.id})">पासवर्ड रीसेट</button>
+        ${u.username !== 'superadmin' ? `<button class="btn btn-danger" onclick="deleteUser(${u.id})">हटाएं</button>` : ''}
+        ${u.role === 'operator' && appData.currentUser?.role === 'super_admin' ? `<button class="btn btn-primary" onclick="makeAdmin(${u.id})">एडमिन बनाएं</button>` : ''}
+        </td></tr>`).join('')}</tbody></table></div></div>`;
+        document.getElementById("pageContent").innerHTML = html;
+    }
+
+    function showAddUserModal() {
+        const modalBody = document.getElementById("modalBody");
+        modalBody.innerHTML = `<h3>➕ यूजर जोड़ें</h3><div class="form-group"><label>यूजरनेम</label><input type="text" id="username"></div>
+        <div class="form-group"><label>नाम</label><input type="text" id="name"></div><div class="form-group"><label>पासवर्ड</label><input type="password" id="password"></div>
+        <div class="form-group"><label>रोल</label><select id="role"><option value="operator">ऑपरेटर</option><option value="admin">एडमिन</option></select></div>`;
+        document.getElementById("modalConfirmBtn").onclick = () => {
+            appData.users.push({ id: Date.now(), username: document.getElementById("username").value, name: document.getElementById("name").value, password: btoa(document.getElementById("password").value), role: document.getElementById("role").value, email: `${document.getElementById("username").value}@temple.com`, canChangeDefault: false });
+            saveData();
+            closeModal();
+            renderUsers();
+            showToast("✅ यूजर जुड़ गया!");
+        };
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function resetUserPassword(userId) {
+        const newPass = prompt("नया पासवर्ड डालें:");
+        if(newPass) { const user = appData.users.find(u => u.id === userId); if(user) { user.password = btoa(newPass); saveData(); showToast("✅ पासवर्ड रीसेट!"); } }
+    }
+
+    function deleteUser(userId) {
+        if(confirm("यूजर हटाएं?")) { appData.users = appData.users.filter(u => u.id !== userId); saveData(); renderUsers(); showToast("✅ यूजर हट गया!"); }
+    }
+
+    function makeAdmin(userId) {
+        if(confirm("इस ऑपरेटर को एडमिन बनाएं?")) { const user = appData.users.find(u => u.id === userId); if(user && user.role === "operator") { user.role = "admin"; saveData(); renderUsers(); showToast("✅ अब यह एडमिन है!"); } }
+    }
+
+    // ==================== SETTINGS ====================
+    function renderSettings() {
+        if (!hasPermission("manage_settings")) {
+            document.getElementById("pageContent").innerHTML = "<div class='card'><h3>Access Denied</h3><p>Only Admin can access settings.</p></div>";
+            return;
+        }
+        const html = `<div class="card"><h3>⚙️ सेटिंग्स</h3>
+        <div class="form-group"><label>समिति का नाम</label><input type="text" id="committeeName" value="${appData.settings.committeeName}"></div>
+        <div class="form-group"><label>बैनर</label><input type="text" id="committeeBanner" value="${appData.settings.committeeBanner}"></div>
+        <div class="form-group"><label>UPI ID</label><input type="text" id="upiId" value="${appData.settings.upiId}"></div>
+        <div class="form-group"><label>अध्यक्ष का नाम</label><input type="text" id="presidentName" value="${appData.settings.presidentName}"></div>
+        <div class="form-group"><label>सचिव का नाम</label><input type="text" id="secretaryName" value="${appData.settings.secretaryName}"></div>
+        <div class="form-group"><label>मासिक राशि (₹)</label><input type="number" id="monthlyAmount" value="${appData.settings.monthlyAmount}"></div>
+        <div class="form-group"><label>रसीद फुटर</label><textarea id="receiptFooter" rows="2">${appData.settings.receiptFooter}</textarea></div>
+        <button class="btn btn-primary" onclick="saveSettings()"><i class="fas fa-save"></i> सेव करें</button></div>
+        <div class="card" style="margin-top:16px;"><h3>🖼️ लोगो बदलें</h3><input type="file" id="logoInput" accept="image/*"><div id="logoPreview"></div>
+        <button class="btn btn-primary" onclick="changeLogo()">लोगो अपलोड करें</button></div>
+        <div class="card" style="margin-top:16px;"><h3>🔄 डेटा मैनेजमेंट</h3>
+        <button class="btn btn-success" onclick="downloadBackup()"><i class="fas fa-download"></i> बैकअप डाउनलोड</button>
+        <button class="btn btn-danger" onclick="resetAllData()"><i class="fas fa-trash"></i> सभी डेटा रीसेट</button></div>`;
+        document.getElementById("pageContent").innerHTML = html;
+        if(appData.settings.logo) document.getElementById("logoPreview").innerHTML = `<img src="${appData.settings.logo}" style="width:60px;height:60px;border-radius:50%;margin-top:10px;">`;
+    }
+
+    function saveSettings() {
+        appData.settings.committeeName = document.getElementById("committeeName").value;
+        appData.settings.committeeBanner = document.getElementById("committeeBanner").value;
+        appData.settings.upiId = document.getElementById("upiId").value;
+        appData.settings.presidentName = document.getElementById("presidentName").value;
+        appData.settings.secretaryName = document.getElementById("secretaryName").value;
+        appData.settings.monthlyAmount = parseInt(document.getElementById("monthlyAmount").value);
+        appData.settings.receiptFooter = document.getElementById("receiptFooter").value;
+        document.getElementById("committeeName").innerText = appData.settings.committeeName;
+        document.getElementById("committeeBanner").innerText = appData.settings.committeeBanner;
+        saveData();
+        showToast("✅ सेटिंग्स सेव हो गई!");
+    }
+
+    function changeLogo() {
+        const input = document.getElementById("logoInput");
+        if(input && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (ev) => { appData.settings.logo = ev.target.result; saveData(); document.getElementById("templeLogo").innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`; showToast("✅ लोगो बदल गया!"); };
+            reader.readAsDataURL(input.files[0]);
+        } else { alert("पहले फोटो select करें!"); }
+    }
+
+    function downloadBackup() {
+        const backup = { members: appData.members, payments: appData.payments, expenses: appData.expenses, settings: appData.settings, users: appData.users.map(u => ({ ...u, password: undefined })), backupDate: new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `temple_backup_${new Date().toISOString().split('T')[0]}.json`; a.click(); URL.revokeObjectURL(url);
+        showToast("✅ बैकअप डाउनलोड हो गया!");
+    }
+
+    function resetAllData() {
+        if(confirm("⚠️ सभी डेटा डिलीट हो जाएगा! क्या आप sure हैं?")) { localStorage.removeItem("templeAppData"); location.reload(); }
+    }
+
+    // ==================== HELPERS ====================
+    function getMonths() { return ["जनवरी", "फरवरी", "मार्च", "अप्रैल", "मई", "जून", "जुलाई", "अगस्त", "सितंबर", "अक्टूबर", "नवंबर", "दिसंबर"]; }
+    function setupEventListeners() { document.querySelectorAll('.nav-tab').forEach(tab => { tab.addEventListener('click', () => { currentTab = tab.dataset.tab; document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); renderCurrentPage(); }); }); }
+    function switchTab(tabName) { currentTab = tabName; document.querySelectorAll('.nav-tab').forEach(t => { if(t.dataset.tab === tabName) t.classList.add('active'); else t.classList.remove('active'); }); renderCurrentPage(); }
+    function renderCurrentPage() { switch(currentTab) { case "dashboard": renderDashboard(); break; case "members": renderMembers(); break; case "payments": renderPayments(); break; case "pending": renderPending(); break; case "expenses": renderExpenses(); break; case "users": renderUsers(); break; case "settings": renderSettings(); break; default: renderDashboard(); } }
+    function toggleDarkMode() { document.body.classList.toggle('dark'); appData.settings.darkMode = document.body.classList.contains('dark'); saveData(); }
+    function applyTheme() { if(appData.settings.darkMode) document.body.classList.add('dark'); if(appData.settings.logo) document.getElementById("templeLogo").innerHTML = `<img src="${appData.settings.logo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`; }
+    function toggleLanguage() { currentLang = currentLang === "hi" ? "en" : "hi"; document.querySelectorAll(".nav-tab").forEach((tab, i) => { const keys = ["dashboard", "members", "payments", "pending", "expenses", "users", "settings"]; if(keys[i]) tab.innerHTML = tab.innerHTML.replace(/[^<]*/, `<i class="${tab.innerHTML.match(/<i class="([^"]+)"/)[1]}"></i> ${t(keys[i])}`); }); renderCurrentPage(); }
+    function closeModal() { document.getElementById("modal").style.display = "none"; document.getElementById("modalConfirmBtn").style.display = "inline-flex"; window.tempPhoto = null; }
+    function showToast(message) { let toast = document.querySelector('.toast'); if(toast) toast.remove(); toast = document.createElement('div'); toast.className = 'toast'; toast.innerHTML = message; document.body.appendChild(toast); setTimeout(() => toast.remove(), 3000); }
+
+    init();
+</script>
+</body>
+  </html>
